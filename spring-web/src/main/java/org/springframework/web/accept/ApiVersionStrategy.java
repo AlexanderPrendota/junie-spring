@@ -71,6 +71,8 @@ public interface ApiVersionStrategy {
 	default @Nullable Comparable<?> resolveParseAndValidateVersion(HttpServletRequest request) {
 		String value = resolveVersion(request);
 		if (value == null) {
+			// Ensure required check is applied when no version is provided
+			validateVersion(null, request);
 			return getDefaultVersion();
 		}
 		try {
