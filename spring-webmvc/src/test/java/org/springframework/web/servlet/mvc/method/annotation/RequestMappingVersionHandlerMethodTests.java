@@ -78,6 +78,14 @@ public class RequestMappingVersionHandlerMethodTests {
 				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
+	@Test
+	void missingVersionIsRequired() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		this.dispatcherServlet.service(request, response);
+		assertThat(response.getStatus()).isEqualTo(400);
+	}
+
 	private MockHttpServletResponse requestWithVersion(String version) throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addHeader("X-API-VERSION", version);
