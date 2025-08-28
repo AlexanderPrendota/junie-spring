@@ -100,6 +100,14 @@ public class DefaultApiVersionStrategiesTests {
 		assertThatThrownBy(() -> validateVersion("1.2", strategy)).isInstanceOf(InvalidApiVersionException.class);
 	}
 
+	@Test
+	void resolveParseAndValidateVersionMissingRequired() {
+		DefaultApiVersionStrategy strategy = apiVersionStrategy();
+		assertThatThrownBy(() -> strategy.resolveParseAndValidateVersion(exchange))
+				.isInstanceOf(MissingApiVersionException.class)
+				.hasMessage("400 BAD_REQUEST \"API version is required.\"");
+	}
+
 	private static DefaultApiVersionStrategy apiVersionStrategy() {
 		return apiVersionStrategy(null, false, null);
 	}
