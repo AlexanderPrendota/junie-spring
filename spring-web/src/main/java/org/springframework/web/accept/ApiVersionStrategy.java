@@ -70,17 +70,19 @@ public interface ApiVersionStrategy {
 	 */
 	default @Nullable Comparable<?> resolveParseAndValidateVersion(HttpServletRequest request) {
 		String value = resolveVersion(request);
-		if (value == null) {
-			return getDefaultVersion();
+		Comparable<?> version = null;
+		if (value != null) {
+			try {
+				version = parseVersion(value);
+			}
+			catch (Exception ex) {
+				throw new InvalidApiVersionException(value, null, ex);
+			}
 		}
-		try {
-			Comparable<?> version = parseVersion(value);
-			validateVersion(version, request);
-			return version;
-		}
-		catch (Exception ex) {
-			throw new InvalidApiVersionException(value, null, ex);
-		}
+		// Validate the resolved version (may be null) to enforce required/supported checks
+		validateVersion(version, request);
+		// If no version was provided and validation passed, return the default (may be null)
+		return (version != null ? version : getDefaultVersion());
 	}
 
 	/**
