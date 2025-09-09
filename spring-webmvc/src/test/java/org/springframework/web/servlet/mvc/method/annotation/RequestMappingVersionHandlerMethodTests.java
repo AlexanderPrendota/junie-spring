@@ -78,6 +78,23 @@ public class RequestMappingVersionHandlerMethodTests {
 				.isEqualTo("<https://example.org/deprecation>; rel=\"deprecation\"; type=\"text/html\"");
 	}
 
+	@Test
+	void missingVersionWhenRequired() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletConfig(new MockServletConfig());
+		context.register(WebConfigRequired.class, TestController.class);
+		context.afterPropertiesSet();
+
+		DispatcherServlet ds = new DispatcherServlet(context);
+		ds.init(new MockServletConfig());
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ds.service(request, response);
+
+		assertThat(response.getStatus()).isEqualTo(400);
+	}
+
 	private MockHttpServletResponse requestWithVersion(String version) throws ServletException, IOException {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 		request.addHeader("X-API-VERSION", version);
@@ -99,6 +116,15 @@ public class RequestMappingVersionHandlerMethodTests {
 			configurer.useRequestHeader("X-API-Version")
 					.addSupportedVersions("1", "1.1", "1.3", "1.6")
 					.setDeprecationHandler(handler);
+		}
+	}
+
+	@EnableWebMvc
+	private static class WebConfigRequired implements WebMvcConfigurer {
+
+		@Override
+		public void configureApiVersioning(ApiVersionConfigurer configurer) {
+			configurer.useRequestHeader("X-API-Version").setVersionRequired(true);
 		}
 	}
 
